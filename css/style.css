@@ -1,0 +1,44 @@
+html {
+  background-color: #ECECEC;
+}
+
+html, body, .container-fluid, .mapSection, #viewDiv {
+  padding: 1px;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#mapBox {
+  border:1px solid;
+  border-color: #000;
+}
+
+h1 {
+  font-size: 20px !important;
+  color:#fff !important;
+}
+
+#header{
+  background-color: #187BCD;
+  display: block;
+  margin: 0 auto;
+}
+
+.row{
+  text-align:center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/*
+.container-fluid {
+  align: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+*/
+
+.mapSection {
+  background-color:#187BCD;
+}
