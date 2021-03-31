@@ -80,9 +80,10 @@ p {
 }
 
 .myPanel {
+  margin: auto;
   background-color:#fff !important;
   overflow-x: hidden; /* Hide horizontal scrollbar */
   overflow-y: scroll; /* Add vertical scrollbar */
   height: 200px;
-  width: 290px;
+  width: 250px;
 }
