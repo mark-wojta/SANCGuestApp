@@ -20,10 +20,14 @@ require([
     "esri/widgets/Editor/UpdateWorkflow",
     "esri/widgets/Locate",
     "esri/widgets/FeatureForm",
-    "esri/widgets/FeatureTemplates"
+    "esri/widgets/FeatureTemplates",
+    "dojo/dom-class",
+    "esri/widgets/Popup",
+    "esri/PopupTemplate",
+    "esri/widgets/Home"
 
  ], function(esriConfig, Map, MapView, FeatureLayer, Search, QueryTask, Query, FeatureTable, LayerList, watchUtils, Expand,
-  BasemapGallery, domConstruct, dom, on, watchUtils, Editor, CreateWorkflow, UpdateWorkflow, Locate, FeatureForm, FeatureTemplates) {
+  BasemapGallery, domConstruct, dom, on, watchUtils, Editor, CreateWorkflow, UpdateWorkflow, Locate, FeatureForm, FeatureTemplates, domClass,  Popup, PopupTemplate, Home) {
 
   //ADD LOAD SYMBOL TILL MAMP AND FEATURES ARE FULLY LOADED???????
 
@@ -43,44 +47,327 @@ require([
   }
   );
 
+  var homeBtn = new Home({
+    view: view
+  });
+
+  const wetlandsRenderer = {
+    type: "simple",
+    symbol: {
+      type: "simple-fill",
+      size: 6,
+      color: "#038C73",
+      outline: {
+        width: 0.1,
+        color: "black"
+      }
+    }
+  };
+
   //school district feature layer (points)
   const wetlandsLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/4"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/4",
+    renderer: wetlandsRenderer,
+    opacity: 0.1
   });
 
   map.add(wetlandsLayer);
 
+  const pondsRenderer = {
+    type: "simple",
+    symbol: {
+      type: "simple-fill",
+      size: 6,
+      color: "#8AC5C0",
+      outline: {
+        width: 0.1,
+        color: "black"
+      }
+    }
+  };
+
   //school district feature layer (points)
   const pondsLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/3"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/3",
+    renderer: pondsRenderer,
+    opacity: 0.1
   });
 
   map.add(pondsLayer);
 
+  // Symbol for freeways
+  const aspSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#000000",
+    width: "1px",
+    style: "solid"
+  };
+
+  // Symbol for U.S. Highways
+  const boaSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#0D98BA",
+    width: "1px",
+    style: "solid"
+  };
+
+  // Symbol for other major highways
+  const combSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#DC9456",
+    width: "1px",
+    style: "solid"
+  };
+
+  // Symbol for freeways
+  const crusSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#333333",
+    width: "1px",
+    style: "short-dot"
+  };
+
+  // Symbol for U.S. Highways
+  const resSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#68991C",
+    width: "1px",
+    style: "short-dot"
+  };
+
+  // Symbol for other major highways
+  const uniSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#68991C",
+    width: "1px",
+    style: "solid"
+  };
+
+  // Symbol for other major highways
+  const wooSym = {
+    type: "simple-line", // autocasts as new SimpleLineSymbol()
+    color: "#8B4513",
+    width: "1px",
+    style: "solid"
+  };
+
+  //create trail types
+  const trailsRenderer = {
+    type: "unique-value",
+    legendOptions: {
+            title: "Trail Types"
+          },
+    defaultSymbol: combSym,
+    defaultLabel: "combination",
+    field: "Surface_Ty",
+    uniqueValueInfos: [
+      {
+        value: "1", // code for interstates/freeways
+        symbol: aspSym,
+        label: "asphalt"
+      },
+      {
+        value: "4", // code for U.S. highways
+        symbol: boaSym,
+        label: "boardwalk"
+      },
+      {
+        value: "2", // code for interstates/freeways
+        symbol: crusSym,
+        label: "crushed stone"
+      },
+      {
+        value: "6", // code for U.S. highways
+        symbol: resSym,
+        label: "research trail"
+      },
+      {
+        value: "3", // code for interstates/freeways
+        symbol: uniSym,
+        label: "unimproved"
+      },
+      {
+        value: "5", // code for U.S. highways
+        symbol: wooSym,
+        label: "wooden structure"
+      }
+    ]
+  };
+
   //school district feature layer (points)
   const trailsLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/1"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/1",
+    renderer: trailsRenderer,
+    opacity: 1,
   });
 
   map.add(trailsLayer);
 
+  //create schools icon
+  const burrowsRenderer = {
+    "type": "simple",
+    "symbol": {
+      "type": "picture-marker",
+      "url": "img/crayfish2.png",
+      "width": "8px",
+      "height": "8px"
+    }
+  }
+
   //schools feature layer (points)
   const burrowsLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/5"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/5",
+    renderer: burrowsRenderer
   });
-
+  //hides crayfish burrows layer on page load
+  burrowsLayer.visible = false;
   map.add(burrowsLayer);
+
+  //adding icon types for infrastructure
+  var infraRenderer = {
+    type: "unique-value",  // autocasts as new UniqueValueRenderer()
+    legendOptions: {
+      title: "Infrastructure Types"
+    },
+    field: "TYPE_",  // values returned by this function will
+                       // be used to render features by type
+    uniqueValueInfos: [
+      {
+        value: "BW",  // features labeled as "High"
+        label: "boardwalk",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/boardwalk.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "BE",  // features labeled as "Medium"
+        label: "bench",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/bench.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "DE",  // features labeled as "Low"
+        label: "deck",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/deck.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "FO",  // features labeled as "High"
+        label: "fountain",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/fountain.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "GT",  // features labeled as "Medium"
+        label: "gate",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/gate.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "PL",  // features labeled as "Low"
+        label: "plaque",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/plaque.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "TR",  // features labeled as "High"
+        label: "trash/recycing",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/trash.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "TW",  // features labeled as "Medium"
+        label: "tower",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/tower.png",
+          "width": "16px",
+          "height": "16px"
+        }
+      }, {
+        value: "VI",  // features labeled as "Low"
+        label: "vista",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/vista.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "WP",  // features labeled as "High"
+        label: "sign",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/sign.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }, {
+        value: "BR",  // features labeled as "Medium"
+        label: "bridge",
+        symbol: {
+          "type": "picture-marker",
+          "url": "img/bridge.png",
+          "width": "12px",
+          "height": "12px"
+        }
+      }
+    ]
+  };
 
   //school district feature layer (points)
   const infrastructureLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/0"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/0",
+    renderer: infraRenderer
   });
 
   map.add(infrastructureLayer);
 
+  // Define a pop-up for stands
+  const popupStands = {
+    "title": "Stand Number {STAND} </br>Habitat Type: {cover_grou}"
+  }
+
+  const standsRenderer = {
+    type: "simple",
+    symbol: {
+      type: "simple-fill",
+      size: 6,
+      color: "#8C2703",
+      outline: {
+        width: 0.1,
+        color: "black"
+      }
+    }
+  };
+
   //school district feature layer (polygons)
   const standsLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/2"
+    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/2",
+    renderer: standsRenderer,
+    opacity: 0.2,
+    outFields: ["STAND","cover_grou"],
+    popupTemplate: popupStands
   });
 
   map.add(standsLayer, 0);
@@ -94,7 +381,6 @@ require([
       return view.goTo(options.target);
     }
   });
-  view.ui.add(locate, "top-left");
 
 /*
   // New FeatureForm and set its layer to Crayfish Burrows FeatureLayer.
@@ -220,34 +506,25 @@ require([
     }
   });
 
-  //adds expand button to map TRY TO CHANGE ICON AND WORDS OF EXPAND BOX
-  editorExpand = new Expand({
-   expandIconClass: "esri-icon-layer-list",  // see https://developers.arcgis.com/javascript/latest/guide/esri-icon-font/
-   // expandTooltip: "Expand LayerList", // optional, defaults to "Expand" for English locale
-   view: view,
-   content: editor,
-   expandTooltip: "Add Crayfish Burrow Location"
-  });
-
-  view.ui.add(editorExpand, "top-left");
-
   //create node for content panel
   var node = domConstruct.create("div", {
     className: "myPanel",
-    innerHTML: "Select files: <input type='file' multiple><br>" +
-    "<input type='submit' id='btnSubmit'>"
+    innerHTML: "<b>Application Information:</b><br>" +
+    '<a class="none" href="https://www.schlitzaudubon.org/" target="_blank"><img class="SANC" src="img/SANC.png" alt="SANC" style="width:100px;height:75px;"></a>' +
+    "<p>Welcome to SANC, the purpose of this application is to allow visitors to maximize the center's resources by understanding the property layout. This will enable our visitors to learn about nature while respecting it at the same time. Our nature center is managed based on property stand areas. Each stand area is displayed on the map and is selectable by search or click to allow users to understand which type of habitat is dominant in that stand area. For more information on SANC, please click the image of the SANC sign above. Please stay on SANC's trails during your visit and thank you for visiting.</p></b>" +
+    '<a class="none" href="https://dnr.wi.gov/topic/EndangeredResources/Animals.asp?mode=detail&SpecCode=ICMAL14310" target="_blank"><img class="SANC" src="img/crayfishPic.png" alt="Prairie Crayfish" style="width:100px;height:60px;"></a>' +
+    "<p>This application allows vistors to participate in the monitoring of Wisconsin's Threatened Prairie Crayfish species. These crayfish live in burrows in the soil. If you have found a potential crayfish burrow and would like to participate in monitoring, please turn the Crayfish Burrows layer on and add a burrow location to the map by inputting required observations about the burrow. You also have the ability to edit previous burrows you've plotted. For more information about Prairie Crayfish, please click the image of the crayfish above. Thank you for helping to manage this species. </p></b>"
   });
 
-  const addAttach = new Expand({
+  const purpose = new Expand({
+   expandIconClass: "esri-icon-description",
    view: view,
    expanded: false,
-   expandTooltip: "Add Attachment",
+   expandTooltip: "Application Purpose",
    content: node
   });
 
-  view.ui.add(addAttach, "top-left");
-
-  watchUtils.whenTrueOnce(addAttach, 'expanded', function(){
+  watchUtils.whenTrueOnce(purpose, 'expanded', function(){
    on(dom.byId("btnSubmit"), 'click', function(){
      console.log("submit clicked");
    });
@@ -370,13 +647,30 @@ require([
 
   view.ui.add(layerListExpand, "top-left");
 
-  //pop up for school district being searched
+  //adds expand button to map TRY TO CHANGE ICON AND WORDS OF EXPAND BOX
+  editorExpand = new Expand({
+   expandIconClass: "esri-icon-visible",  // see https://developers.arcgis.com/javascript/latest/guide/esri-icon-font/
+   // expandTooltip: "Expand LayerList", // optional, defaults to "Expand" for English locale
+   view: view,
+   content: editor,
+   expandTooltip: "Threatened Prairie Crayfish Monitoring"
+  });
+
+  view.ui.add(editorExpand, "top-left");
+
+  //add location button to map
+  view.ui.add(locate, "top-left");
+
+  // Add the home button to the top left corner of the view
+  view.ui.add(homeBtn, "top-left");
+
+  //pop up for stand  being searched
   var standsSearch = new FeatureLayer({
    url:
      "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/project2for777/FeatureServer/2",
    popupTemplate: {
      // autocasts as new PopupTemplate()
-     title: "Stand Number {STAND} </br>Cover Type: {Cover_type}",
+     title: "Stand Number {STAND} </br>Habitat Type: {cover_grou}",
      overwriteActions: true
    }
   });
@@ -386,16 +680,16 @@ require([
   //fix pops up for trails, schools, and addressess to display name and which school district it SHOULD fall within
   var searchWidget = new Search({
     view: view,
-    allPlaceholder: "Enter School District, Public Library, Public School, or Address",
+    allPlaceholder: "Enter Stand Number",
     sources: [
       {
         layer: standsSearch,
         searchFields: ["STAND"],
         displayField: "STAND",
         exactMatch: false,
-        outFields: ["STAND", "Cover_type"],
+        outFields: ["STAND", "Cover_grou"],
         name: "SANC Management Stands",
-        placeholder: "example: 3708"
+        placeholder: "Stand Search(ex: 67)"
       }
   /*            {
         layer: featureLayerSenators,
@@ -413,7 +707,8 @@ require([
         }
       } */
 
-    ]
+    ],
+    includeDefaultSources: false
 
   });
 
@@ -421,5 +716,7 @@ require([
   view.ui.add(searchWidget, {
     position: "top-right"
   });
+
+  view.ui.add(purpose, "top-right");
 
 });
