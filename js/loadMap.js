@@ -29,8 +29,6 @@ require([
  ], function(esriConfig, Map, MapView, FeatureLayer, Search, QueryTask, Query, FeatureTable, LayerList, watchUtils, Expand,
   BasemapGallery, domConstruct, dom, on, watchUtils, Editor, CreateWorkflow, UpdateWorkflow, Locate, FeatureForm, FeatureTemplates, domClass,  Popup, PopupTemplate, Home) {
 
-  //ADD LOAD SYMBOL TILL MAMP AND FEATURES ARE FULLY LOADED???????
-
   esriConfig.apiKey = "AAPK09708988961a422ea5b425d3b6f0c29cdflrfU10ugyKjgMqzJPof0_5o4dCILkXhVFEdLunqo1Xyuej9fSD_GHhbvlrYpNK";
 
   //creating base map
@@ -355,8 +353,8 @@ require([
       size: 6,
       color: "#8C2703",
       outline: {
-        width: 0.1,
-        color: "black"
+        color: [128, 128, 128, 0.5],
+        width: "0.5px"
       }
     }
   };
